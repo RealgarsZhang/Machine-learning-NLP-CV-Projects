@@ -1,0 +1,1 @@
+In P1.py, there are several functions(unigram(),bigram(),trigram(),etc). The code invokes these functions. After you see the prompt you can press enter to run the training under corresponding feature representation. Iteration numbers will be printed for you to get an idea of how fast the program runs. Test and training error will be printed at the end of each function. 
