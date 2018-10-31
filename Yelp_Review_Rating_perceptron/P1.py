@@ -300,117 +300,7 @@ def dict_sum(w1,w2):
         w1[key] += w2[key]
 
 
-
-def unigram_dic(train_corpus,train_labels,test_corpus,test_labels):
-    n = train_corpus.shape[0]
-
-    index = np.arange(n)
-
-    temp1 = train_corpus.copy()
-    temp2 = train_labels.copy()
-    shuffled_data1 = np.vstack((temp1,temp2))
-    shuffled_data1 = shuffled_data1.transpose()
-    np.random.shuffle(shuffled_data1)
-
-    temp1 = train_corpus.copy()
-    temp2 = train_labels.copy()
-    shuffled_data2 = np.vstack((temp1, temp2))
-    shuffled_data2 = shuffled_data2.transpose()
-    np.random.shuffle(shuffled_data2)
-
-    weight_dic = defaultdict(int)
-    for i in range(n):
-        print(i)
-        text = shuffled_data1[i][0]
-        label = shuffled_data1[i][1]
-        bi_seq = get_ngrams(text, 1)
-        prod = 0
-        for item in bi_seq:
-            prod += weight_dic[item]
-        prod += weight_dic[1]
-        #print (prod,label)
-        if prod*label<=0:
-            if label < 0:
-                dict_subtract(weight_dic,bi_seq)
-                weight_dic[1] -= 1
-            else:
-                dict_add(weight_dic,bi_seq)
-                weight_dic[1] += 1
-
-    weight_sum = weight_dic.copy()
-
-    for key in weight_sum:
-        weight_sum[key] *= (n+1)
-
-    #trial_weight_sum = weight_dic.copy()
-    for i in range(n):
-        print(i)
-        text = shuffled_data2[i][0]
-        label = shuffled_data2[i][1]
-        bi_seq = get_ngrams(text, 1)
-        prod = 0
-        for item in bi_seq:
-            prod += weight_dic[item]
-        prod += weight_dic[1]
-
-        if prod*label<=0:
-            if label < 0:
-                dict_subtract(weight_dic, bi_seq)
-                weight_dic[1] -= 1
-                for item in bi_seq:
-                    weight_sum[item] -= (n-i)
-                weight_sum[1] -= (n-i)
-            else:
-                dict_add(weight_dic, bi_seq)
-                weight_dic[1] += 1
-                for item in bi_seq:
-                    weight_sum[item] += (n-i)
-                weight_sum[1] += (n - i)
-        #dict_sum(trial_weight_sum,weight_dic)
-
-    for key in weight_sum:
-        weight_sum[key] /= (n + 1)
-        #trial_weight_sum[key] /= (n+1)
-
-    test_size = test_corpus.shape[0]
-    wrong_cnt = 0
-    for i in range(test_size):
-        text = test_corpus[i]
-        label = test_labels[i]
-        bi_seq = get_ngrams(text, 1)
-        prod = 0
-        for item in bi_seq:
-            prod += weight_sum[item]
-        prod += weight_sum[1]
-
-        if prod*label<=0:
-            wrong_cnt += 1
-
-
-    print("Test error is :", wrong_cnt / test_size)
-
-    wrong_cnt = 0
-    for i in range(n):
-        text = train_corpus[i]
-        label = train_labels[i]
-        bi_seq = get_ngrams(text, 1)
-        prod = 0
-        for item in bi_seq:
-            prod += weight_sum[item]
-        prod += weight_sum[1]
-
-        if prod*label<=0:
-            wrong_cnt += 1
-
-    print("Train error is :", wrong_cnt / n)
-
-
-
-
-
-
-
-def bigram(train_corpus,train_labels,test_corpus,test_labels):
+def ngram_perceptron(train_corpus,train_labels,test_corpus,test_labels,highest_gram):
     n = train_corpus.shape[0]
 
     index = np.arange(n)
@@ -432,7 +322,9 @@ def bigram(train_corpus,train_labels,test_corpus,test_labels):
         print(i)
         text = shuffled_data1[i][0]
         label = shuffled_data1[i][1]
-        bi_seq = get_ngrams(text, 2)+get_ngrams(text,1)
+        bi_seq = []
+        for k in range(1,highest_gram+1):
+            bi_seq += get_ngrams(text, k)
         prod = 0
         for item in bi_seq:
             prod += weight_dic[item]
@@ -456,7 +348,9 @@ def bigram(train_corpus,train_labels,test_corpus,test_labels):
         print(i)
         text = shuffled_data2[i][0]
         label = shuffled_data2[i][1]
-        bi_seq = get_ngrams(text, 2)+get_ngrams(text,1)
+        bi_seq = []
+        for k in range(1, highest_gram + 1):
+            bi_seq += get_ngrams(text, k)
         prod = 0
         for item in bi_seq:
             prod += weight_dic[item]
@@ -486,7 +380,9 @@ def bigram(train_corpus,train_labels,test_corpus,test_labels):
     for i in range(test_size):
         text = test_corpus[i]
         label = test_labels[i]
-        bi_seq = get_ngrams(text, 2)+get_ngrams(text,1)
+        bi_seq = []
+        for k in range(1, highest_gram + 1):
+            bi_seq += get_ngrams(text, k)
         prod = 0
         for item in bi_seq:
             prod += weight_sum[item]
@@ -501,111 +397,9 @@ def bigram(train_corpus,train_labels,test_corpus,test_labels):
     for i in range(n):
         text = train_corpus[i]
         label = train_labels[i]
-        bi_seq = get_ngrams(text, 2)+get_ngrams(text,1)
-        prod = 0
-        for item in bi_seq:
-            prod += weight_sum[item]
-        prod += weight_sum[1]
-
-        if prod * label <= 0:
-            wrong_cnt += 1
-
-    print("Train error is :", wrong_cnt / n)
-
-
-
-def trigram(train_corpus,train_labels,test_corpus,test_labels):
-    n = train_corpus.shape[0]
-
-    index = np.arange(n)
-
-    temp1 = train_corpus.copy()
-    temp2 = train_labels.copy()
-    shuffled_data1 = np.vstack((temp1, temp2))
-    shuffled_data1 = shuffled_data1.transpose()
-    np.random.shuffle(shuffled_data1)
-
-    temp1 = train_corpus.copy()
-    temp2 = train_labels.copy()
-    shuffled_data2 = np.vstack((temp1, temp2))
-    shuffled_data2 = shuffled_data2.transpose()
-    np.random.shuffle(shuffled_data2)
-
-    weight_dic = defaultdict(int)
-    for i in range(n):
-        print(i)
-        text = shuffled_data1[i][0]
-        label = shuffled_data1[i][1]
-        bi_seq = get_ngrams(text, 3)+get_ngrams(text, 2)+get_ngrams(text,1)
-        prod = 0
-        for item in bi_seq:
-            prod += weight_dic[item]
-        prod += weight_dic[1]
-        #print(prod, label)
-        if prod * label <= 0:
-            if label < 0:
-                dict_subtract(weight_dic, bi_seq)
-                weight_dic[1] -= 1
-            else:
-                dict_add(weight_dic, bi_seq)
-                weight_dic[1] += 1
-
-    weight_sum = weight_dic.copy()
-
-    for key in weight_sum:
-        weight_sum[key] *= (n + 1)
-
-    # trial_weight_sum = weight_dic.copy()
-    for i in range(n):
-        print(i)
-        text = shuffled_data2[i][0]
-        label = shuffled_data2[i][1]
-        bi_seq = get_ngrams(text, 3)+get_ngrams(text, 2)+get_ngrams(text,1)
-        prod = 0
-        for item in bi_seq:
-            prod += weight_dic[item]
-        prod += weight_dic[1]
-
-        if prod * label <= 0:
-            if label < 0:
-                dict_subtract(weight_dic, bi_seq)
-                weight_dic[1] -= 1
-                for item in bi_seq:
-                    weight_sum[item] -= (n - i)
-                weight_sum[1] -= (n - i)
-            else:
-                dict_add(weight_dic, bi_seq)
-                weight_dic[1] += 1
-                for item in bi_seq:
-                    weight_sum[item] += (n - i)
-                weight_sum[1] += (n - i)
-                # dict_sum(trial_weight_sum,weight_dic)
-
-    for key in weight_sum:
-        weight_sum[key] /= (n + 1)
-        # trial_weight_sum[key] /= (n+1)
-
-    test_size = test_corpus.shape[0]
-    wrong_cnt = 0
-    for i in range(test_size):
-        text = test_corpus[i]
-        label = test_labels[i]
-        bi_seq = get_ngrams(text, 3)+get_ngrams(text, 2)+get_ngrams(text,1)
-        prod = 0
-        for item in bi_seq:
-            prod += weight_sum[item]
-        prod += weight_sum[1]
-
-        if prod * label <= 0:
-            wrong_cnt += 1
-
-    print("Test error is :", wrong_cnt / test_size)
-
-    wrong_cnt = 0
-    for i in range(n):
-        text = train_corpus[i]
-        label = train_labels[i]
-        bi_seq = get_ngrams(text, 3)+get_ngrams(text, 2)+get_ngrams(text,1)
+        bi_seq = []
+        for k in range(1, highest_gram + 1):
+            bi_seq += get_ngrams(text, k)
         prod = 0
         for item in bi_seq:
             prod += weight_sum[item]
@@ -676,9 +470,9 @@ while len(wrong_idx)<2:
 buffer = input("Press ENTER to run for tfidf.")
 reply_tfidf = tfidf(train_corpus,train_labels,test_corpus,test_labels)
 buffer = input("Press ENTER to run for bigram.")
-bigram(train_corpus,train_labels,test_corpus,test_labels)
+ngram_perceptron(train_corpus,train_labels,test_corpus,test_labels,2)
 buffer = input("Press ENTER to run for trigram.")
-trigram(train_corpus,train_labels,test_corpus,test_labels)
+ngram_perceptron(train_corpus,train_labels,test_corpus,test_labels,3)
 
 
 
