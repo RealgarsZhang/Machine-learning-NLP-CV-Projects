@@ -1,0 +1,3 @@
+naive_bayes.py: run it from terminal: python ./naive_bayes.py . It will print the error rates.
+nn.py: From the code skeleton provided. Also run it from terminal
+Problem1.py: My original code for problem1. Run from terminal. It prints the accuracy of using all training data. Then it plots the learning curve and prints the data the curve is based on.
