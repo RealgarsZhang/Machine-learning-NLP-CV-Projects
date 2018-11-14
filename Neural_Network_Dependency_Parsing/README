@@ -1,0 +1,14 @@
+To obtain the vocabulary, run:
+$python get_vocab.py data/train.conll data/words.vocab data/pos.vocab
+
+To extract features for training, run:
+$python extract_training_data.py data/train.conll data/input_train.npy data/target_train.npy
+
+To parse the data with the parser trained, run:
+$python decoder.py data/model.h5 data/dev.conll
+
+To evaluate the model, run:
+$python evaluate.py data/model.h5 data/dev.conll
+
+
+
